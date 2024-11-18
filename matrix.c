@@ -13,7 +13,9 @@ matrix startmtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_
         data_width,
         data_height,
         width,
-        height
+        height,
+        (size_t *) malloc(sizeof(size_t) * width),
+        (size_t *) malloc(sizeof(size_t) * height),
     };
 
     //refresh to tell ncurses about the new window
@@ -25,7 +27,6 @@ matrix startmtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_
     float decimal = ratio - floor(ratio);
     float error = 0;
 
-    mtrx.steps_x = (size_t *) malloc(sizeof(size_t) * width);
     for(size_t i = 0; i < width; i++){
         mtrx.steps_x[i] = integer + floor(error);
         error += decimal - floor(error);
@@ -37,7 +38,6 @@ matrix startmtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_
     decimal = ratio - floor(ratio);
     error = 0;
 
-    mtrx.steps_y = (size_t *) malloc(sizeof(size_t) * height);
     for(size_t i = 0; i < height; i++){
         mtrx.steps_y[i] = integer + floor(error);
         error += decimal - floor(error);
