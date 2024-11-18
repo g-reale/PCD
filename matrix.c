@@ -1,52 +1,108 @@
 #include "matrix.h"
+#include "globals.h"
 #include <ncurses.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <math.h>
 
-matrix startmtrx(unsigned int heigth, unsigned int width, unsigned int y0, unsigned int x0, unsigned int data_heigth, unsigned int data_width){
+matrix startmtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_height, size_t data_width){
     
     matrix mtrx = {
-        newwin(heigth,width,y0,x0),
-        0,
-        0,
+        newwin(height,width,y0,x0),
+        0.0f,
         data_width,
-        data_heigth,
-        ((float)heigth) / ((float)data_heigth),
-        ((float)width) / ((float)data_width),
+        data_height,
+        width,
+        height
     };
+
+    //refresh to tell ncurses about the new window
+    refresh();
+
+    //create the downsampling plan on the x axis 
+    float ratio = ((float)data_width) / ((float)width);
+    size_t integer = floor(ratio);
+    float decimal = ratio - floor(ratio);
+    float error = 0;
+
+    mtrx.steps_x = (size_t *) malloc(sizeof(size_t) * width);
+    for(size_t i = 0; i < width; i++){
+        mtrx.steps_x[i] = integer + floor(error);
+        error += decimal - floor(error);
+    }
+
+    //create the downsampling plan on the y axis
+    ratio = ((float)data_height) / ((float)height);
+    integer = floor(ratio);
+    decimal = ratio - floor(ratio);
+    error = 0;
+
+    mtrx.steps_y = (size_t *) malloc(sizeof(size_t) * height);
+    for(size_t i = 0; i < height; i++){
+        mtrx.steps_y[i] = integer + floor(error);
+        error += decimal - floor(error);
+    }
 
     return mtrx;
 }
 
-void loaddata(matrix * mtrx,float ** data, unsigned int heigth, unsigned int width){
-    unsigned int mtrx_heigth;
-    unsigned int mtrx_width;
-    getmaxyx(mtrx->win,mtrx_heigth,mtrx_width);
-
-    //the data set must at least be the size of the matix
-    if(heigth < mtrx_heigth || width < mtrx_width)
+void loaddata(matrix * mtrx,float ** data, size_t data_height, size_t data_width){
+    
+    if(data_height != mtrx->data_height || data_width != mtrx->data_width)
         return;
     
-    float h_ratio = ((float)mtrx_heigth)/((float)heigth);
-    float w_ratio = ((float)mtrx_width)/((float)width);
+    // push the color to restore it's original information later
+    // pushcolor();
+    
+    size_t row = 0;
+    size_t column = 0;
 
-    //load the data into the mtrx's window
-    //downsample the data table to fit the mtrx
-    float sample_x = 0;
-    float sample_y = 0;
-    for(unsigned int i = 0; i < mtrx_width; i++){
-    for(unsigned int j = 0; j < mtrx_heigth; j++){
-        float sample = data[(int)sample_x][(int)sample_y];
-        if(mtrx->cell_max < sample)
-            mtrx->cell_max = sample;
-        sample = 1000 * sample/mtrx->cell_max;
+    for(size_t i = 0; i < mtrx->width; i++){
+        size_t step_x = mtrx->steps_x[i];
 
-        init_color(COLOR_CYAN,sample,sample,sample);
-        
-        sample_x += w_ratio;
+        for(size_t j = 0; j < mtrx->height; j++){
+            size_t step_y = mtrx->steps_y[j];
+
+            //calculate the sum according to the downsampling plan
+            float sum = 0;
+            for(size_t k = row; k < row + step_x; k++){
+            for(size_t l = column; l < column + step_y; l++){
+                sum += data[k][l];
+            }}
+
+            // fprintf(stderr,"%lu %lu %f\n",i,j,sum);
+            // fflush(stderr);
+            
+            //normalize the sum from [0,1]
+            if(mtrx->cell_max < sum)
+                mtrx->cell_max = sum;
+            if(mtrx->cell_max)
+                sum = sum/mtrx->cell_max;
+
+            // fprintf(stderr,"%lu %lu %f %f",i,j,sum,mtrx->cell_max);
+            // fflush(stderr);
+
+            //print the sum using ncurses
+            mvwprintw(mtrx->win,j,i,"%c",getgrayscale2(sum));
+            
+            //update the starting column of the sum
+            column += step_y;
+        }
+
+        //update the starting row of the sum
+        row += step_x;
+        column = 0;
     }
-        sample_y += h_ratio;
-    }
+
+    //update the window
+    wrefresh(mtrx->win);
+
+    //restore the original color information
+    // popcolor();
 }
 
 void destroymtrx(matrix * mtrx){
     delwin(mtrx->win);
+    free(mtrx->steps_x);
+    free(mtrx->steps_y);
 }

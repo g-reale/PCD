@@ -1,18 +1,23 @@
-#include <ncurses.h>
+#ifndef MATRIX_H
+#define MATRIX_H
 
-//only a single matrix must exist
-bool initialized = false;
+#include <ncurses.h>
+#include <stddef.h>
+
 typedef struct {
     WINDOW * win;
-    float cell_min = 0;
-    float cell_max = 0;
-    unsigned int data_width = 0;
-    unsigned int data_heigth = 0;
-    float h_ratio;
-    float w_ratio;
+    float cell_max;
+    size_t data_width;
+    size_t data_height;
+    size_t width;
+    size_t height;
+    size_t * steps_x;
+    size_t * steps_y;
 }matrix;
 
 
-matrix startmtrx(unsigned int heigth, unsigned int width, unsigned int y0, unsigned int x0);
-void loaddata(matrix * mtrx, float ** data, unsigned int heigth, unsigned int width);
-void destroymtrx(,matrix * mtrx);
+matrix startmtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_height, size_t data_width);
+void loaddata(matrix * mtrx, float ** data, size_t data_height, size_t data_width);
+void destroymtrx(matrix * mtrx);
+
+#endif
