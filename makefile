@@ -1,5 +1,5 @@
 COMPILER = gcc
-CFLAGS = -g -fsanitize=address -Wall -Wextra
+CFLAGS = -g  -Wall -Wextra #-fsanitize=address
 LIBS = -lm -lncurses
 
 SRC_FILES = $(wildcard *.c)
@@ -18,4 +18,10 @@ object/%.o: %.c
 clean:
 	rm -rf object $(TARGET)
 
-.PHONY: all clean
+run: all
+	./main || reset
+
+debug: all
+	./main 2> stderr.log || reset && cat stderr.log
+
+.PHONY: all clean run debug 

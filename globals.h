@@ -3,20 +3,70 @@
 
 #include <ncurses.h>
 #include <stddef.h>
+#include <math.h>
 
-static const char GRAY_SCALE_CHRS[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'.";
-static const size_t GRAY_SCALE_SIZE = 71;  
-static const char GRAY_SCALE_CHRS_2[] =  " .:-=+*#%@";
-static const size_t GRAY_SCALE_SIZE_2 = 10;  
+#define declare1D(type)\
+typedef struct {\
+    size_t height;\
+    type * data;\
+} type##_1D;
 
+#define start1D(h,var,type)\
+    var.height = h;\
+    var.data = (type*)malloc(sizeof(type) * h);
 
-static inline char getgrayscale(float brightness){
-    return GRAY_SCALE_CHRS[(int)(brightness * GRAY_SCALE_SIZE)];
+#define destroy1D(var)\
+    var.height = 0;\
+    free(var.data);\
+
+#define declare2D(type)\
+typedef struct{\
+    size_t height;\
+    size_t width;\
+    type ** data;\
+} type##_2D\
+
+#define start2D(h,w,var,type)\
+    var.height = h;\
+    var.width = w;\
+    var.data = (type**)malloc(sizeof(type*) * h);\
+    for(size_t i = 0; i < h; i++){\
+        var.data[i] = (type*)malloc(sizeof(type) * w);\
+    }
+
+#define destroy2D(var)\
+    for(size_t i = 0; i < var.height; i++)\
+        free(var.data[i]);\
+    free(var.data);\
+    var.height = 0;\
+    var.width = 0;
+
+declare1D(size_t);
+declare1D(float);
+declare1D(char);
+declare2D(size_t);
+declare2D(float);
+declare2D(char);
+
+static const char_1D GRAY_SCALE = {
+    71,
+    "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'."
+};
+
+static const char_1D GRAY_SCALE_1 = {
+    10,
+    " .:-=+*#%@"
+};
+
+#define clamp(value,min,max)\
+    (value) < (min) ? (min) : (max) < (value) ? (max) : (value)
+
+static inline char getgrayscale(char_1D grayscale,float brightness){
+    size_t index = fabs(brightness * (float)grayscale.height);
+    index = index < grayscale.height ? index : grayscale.height-1; 
+    return grayscale.data[index];
 }
 
-static inline char getgrayscale2(float brightness){
-    return GRAY_SCALE_CHRS_2[(int)(brightness * GRAY_SCALE_SIZE_2)];
-}
 
 // static inline void setgrayscale(WINDOW * win, float brightness){
 //     char num[4];
@@ -58,7 +108,7 @@ static inline char getgrayscale2(float brightness){
 //     attr_t attrs;
 //     short current_color_pair;
 //     wattr_get(win,&attrs, &current_color_pair, NULL);
-//     fprintf(stderr, "Brightness: %f, Using color pair: %d, Can change color: %d\n",
+//     fprintf(stderr, "Brightness: %f, Using color pair: %d, Can change color: %d\width",
 //             brightness, aux, can_change_color());
 // }
 
