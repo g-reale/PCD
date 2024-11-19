@@ -60,9 +60,9 @@ matrix start_mtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data
 }
 
 void configure_mtrx(matrix mtrx){
+    noecho();
     wmove(mtrx.win,1,1);
     keypad(mtrx.win,true);
-    noecho();
 
     size_t input;
     int done = false;
@@ -71,7 +71,7 @@ void configure_mtrx(matrix mtrx){
 
     do{
         input = wgetch(mtrx.win);
-        fprintf(stderr,"%c\n",(char)input);
+        fprintf(stderr,"%c %ld %ld\n",(char)input, cursor_y, cursor_x);
         switch (input){
             case KEY_UP:
                 cursor_y = clamp(cursor_y-1,1,mtrx.steps_y.height);
@@ -98,11 +98,16 @@ void configure_mtrx(matrix mtrx){
                 break;
 
             default:
-                if(input == '\n' || input == '\t' || input == 'q')
+                fprintf(stderr,"default %c\n",(char)input);
+                if(input == '\n' || input == '\t' || input == 'q'){
+                    fprintf(stderr,"done\n");
                     done = true;
+                }
                 break;
+
+            fflush(stderr);
         }
-    }while (done);
+    }while (!done);
 }
 
 void update_mtrx(matrix mtrx, float_2D simspace){

@@ -56,13 +56,12 @@ int main(){
     outputwin outwin = start_outputwin(height - mtrx_height, width, y0, 0, labels, 3);
     update_outputwin(outwin,values);    
 
-    getch();
+    wgetch(stdscr);
     destroy_mtrx(mtrx);
     destroy_outputwin(outwin);
     destroy2D(simspace);
     destroy2D(labels);
     destroy2D(values);
-
     endwin();
     return 0;
 }

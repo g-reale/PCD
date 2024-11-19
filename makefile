@@ -1,5 +1,5 @@
 COMPILER = gcc
-CFLAGS = -g  -Wall -Wextra #-fsanitize=address
+CFLAGS = -g  -Wall -Wextra -fsanitize=address
 LIBS = -lm -lncurses
 
 SRC_FILES = $(wildcard *.c)
