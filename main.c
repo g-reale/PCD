@@ -9,8 +9,8 @@
 #include "simulations.h"
 #include "globals.h"
 
-#define M 1000
-#define N 1000
+#define M 100
+#define N 100
 #define DISP_HEIGHT 4
 #define DIFUSION 0.1
 #define TIME_STEP 0.01
@@ -85,6 +85,7 @@ int main(){
     destroy_mtrx(mtrx);
     destroy_outputwin(outwin);
     destroy_simulation(sim_multi_thread);
+    destroy_simulation(sim_single_thread);
     destroy2D(simspace);
     destroy2D(labels);
     endwin();
