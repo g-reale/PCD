@@ -59,7 +59,7 @@ void update_outputwin(outputwin outwin,char_2D values){
         mvwprintw(outwin.win,outwin.fields_y.data[i],outwin.fields_x.data[i],"%s",values.data[i]);
     wrefresh(outwin.win);
 }
-
+    
 void destroy_outputwin(outputwin outwin){
     delwin(outwin.win);
     destroy1D(outwin.fields_y);

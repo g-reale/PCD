@@ -67,6 +67,29 @@ static inline char getgrayscale(char_1D grayscale,float brightness){
     return grayscale.data[index];
 }
 
+static inline char getarrowkeys(int key, size_t * cursor_y, size_t * cursor_x, size_t y_min, size_t  x_min, size_t y_max, size_t x_max){
+    switch (key){
+        case KEY_UP:
+            *cursor_y = clamp((*cursor_y)-1,y_min,y_max);
+            break;
+        
+        case KEY_DOWN:
+            *cursor_y = clamp((*cursor_y)+1,y_min,y_max);
+            break;
+
+        case KEY_LEFT:
+            *cursor_x = clamp((*cursor_x)-1,x_min,x_max);
+            break;
+        
+        case KEY_RIGHT:
+            *cursor_x = clamp((*cursor_x)+1,x_min,x_max);
+            break;
+        
+        default:
+            return 0;
+    }
+    return key;
+} 
 
 // static inline void setgrayscale(WINDOW * win, float brightness){
 //     char num[4];

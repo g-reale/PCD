@@ -15,4 +15,9 @@ outputwin start_outputwin(size_t height, size_t width, size_t y0, size_t x0, cha
 void update_outputwin(outputwin outwin, char_2D values);
 void destroy_outputwin(outputwin outwin);
 
+#define update_single_outputwin(outwin, index, format, string)\
+    if(index < outwin.fields_y.height){\
+        mvwprintw(outwin.win,outwin.fields_y.data[index],outwin.fields_x.data[index],format,string);\
+    }
+
 #endif

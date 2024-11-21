@@ -21,8 +21,8 @@ typedef struct {
 
 
 matrix start_mtrx(size_t height, size_t width, size_t y0, size_t x0, size_t data_height, size_t data_width);
-void update_mtrx(matrix mtrx, float_2D simspace);
-void configure_mtrx(matrix mt);
+void update_mtrx(matrix * mtrx, float_2D simspace);
+void configure_mtrx(matrix mt, float_2D simspace);
 void destroy_mtrx(matrix mtrx);
 
 #endif
