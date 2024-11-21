@@ -95,9 +95,7 @@ void configure_mtrx(matrix mtrx, float_2D simspace){
         switch (input){
             case '\n':
             case '\r':
-                size_t i = (size_t)(ratio_y * (cursor_y-1));
-                size_t j = (size_t)(ratio_x * (cursor_x-1));
-                simspace.data[i][j] = mtrx.cell_max;
+                simspace.data[(size_t)(ratio_y * (cursor_y-1))][(size_t)(ratio_x * (cursor_x-1))] = mtrx.cell_max;
                 wprintw(mtrx.win,"%c",active);
                 cursor_x = clamp(cursor_x+1,1,mtrx.steps_x.height);
                 wmove(mtrx.win,cursor_y,cursor_x);
