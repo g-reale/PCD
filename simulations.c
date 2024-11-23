@@ -58,6 +58,35 @@ float_2D simulate_OMP(simulation * sim, float delta_t, double * elapsed_time){
     return sim->simspace[sim->current_space];
 } 
 
+//base single threaded implementation
+float_2D simulate_base(simulation * sim, float delta_t, double * elapsed_time){
+    //prepare to return the elapsed time
+    double start = omp_get_wtime();
+
+    //unpacking the parameters for faster access
+    float constant = sim->diffusion * delta_t / (sim->delta_x * sim->delta_x);
+    float ** current = sim->simspace[sim->current_space].data;
+    sim->current_space = !sim->current_space;
+    float ** next = sim->simspace[sim->current_space].data;
+    size_t height = sim->simspace[0].height;
+    size_t width = sim->simspace[0].width;
+
+    //calculate the next iteration
+    for(size_t i = 1; i < height - 1; i++){
+    for(size_t j = 1; j < width - 1; j++){
+        next[i][j] = (current[i][j] + 
+                        constant * 
+                        (current[i - 1][j] + 
+                        current[i + 1][j] +
+                        current[i][j - 1] +   
+                        current[i][j + 1] - 
+                        4 * current[i][j]));
+    }}    
+
+    *elapsed_time = omp_get_wtime() - start;
+    return sim->simspace[sim->current_space];
+}
+
 void destroy_simulation(simulation sim){
     destroy2D(sim.simspace[0]);
     destroy2D(sim.simspace[1]);
