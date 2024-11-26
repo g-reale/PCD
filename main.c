@@ -57,12 +57,13 @@ int main(int argc, char ** argv){
 
         //display labels
         char_2D labels;
-        start2D(5,10,labels,char);
+        start2D(6,10,labels,char);
         strcpy(labels.data[0],"time:\0");
         strcpy(labels.data[1],"threads:\0");
         strcpy(labels.data[2],"d_coeff:\0");
         strcpy(labels.data[3],"speedup:\0");
         strcpy(labels.data[4],"efficy:\0");
+        strcpy(labels.data[5],"diff:\0");
 
         //getting the screen layout
         size_t y0 = 0;
@@ -91,11 +92,13 @@ int main(int argc, char ** argv){
         nodelay(stdscr,true);
         double time_multi_thread;
         double time_single_thread;
+        float difference_multi_thread;
+        float difference_single_thread;
         int input = 0; 
         do{
             //run the serial and parallel simulations
-            float_2D current_frame = simulate_OMP(&sim_multi_thread,time_step,&time_multi_thread); 
-            simulate_base(&sim_single_thread,time_step,&time_single_thread);
+            float_2D current_frame = simulate_OMP(&sim_multi_thread,time_step,&time_multi_thread,&difference_multi_thread); 
+            simulate_base(&sim_single_thread,time_step,&time_single_thread,&difference_single_thread);
             update_mtrx(&mtrx,current_frame);
             
             //calculate the metrics
@@ -106,6 +109,7 @@ int main(int argc, char ** argv){
             update_single_outputwin(outwin,0,"%1.3f",time_multi_thread);
             update_single_outputwin(outwin,3,"%2.1f",speedup);
             update_single_outputwin(outwin,4,"%2.1f",efficiency);
+            update_single_outputwin(outwin,5,"%2.1f",fabs(difference_multi_thread - difference_single_thread));
             wrefresh(outwin.win);
             
             //stop if requested
@@ -127,31 +131,36 @@ int main(int argc, char ** argv){
     
     //print csv header on stdout
     //user can redirect th std to any file they wish
-    fprintf(stdout,"iteration;exec time (1 thread);exec time (%ld threads);speedup;efficiency",threads);
+    fprintf(stdout,"iteration;exec time (1 thread);exec time (%ld threads);speedup;efficiency;difference (1 thread);difference(%ld threads)",threads,threads);
 
     //space where the simulation will take place
     float_2D simspace;
     start2D(M,N,simspace,float);
     
+    //fill the middle of the matrix w\ a dummy input
+    simspace.data[M/2][N/2] = 1e10;
+
     //configuring simulation
     simulation sim_multi_thread = start_simulation(simspace,delta_x,diffusion,threads);
     simulation sim_single_thread = start_simulation(simspace,delta_x,diffusion,1);
     double time_multi_thread;
     double time_single_thread;
-    
+    float difference_multi_thread;
+    float difference_single_thread;
+
     //running the bad boy... again
     for(size_t i = 0; i < iterations; i++){
         
         //run the single and multi threaded simulations
-        simulate_OMP(&sim_multi_thread,time_step,&time_multi_thread); 
-        simulate_OMP(&sim_single_thread,time_step,&time_single_thread); //discard the single threaded frame    
+        simulate_OMP(&sim_multi_thread,time_step,&time_multi_thread,&difference_multi_thread); 
+        simulate_base(&sim_single_thread,time_step,&time_single_thread,&difference_single_thread); //discard the single threaded frame    
         
         //calculate the metrics
         double speedup = time_single_thread / time_multi_thread;
         double efficiency = speedup / ((double)threads);
 
         //output to stdout
-        fprintf(stdout,"\n%ld;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,speedup,efficiency);
+        fprintf(stdout,"\n%ld;%f;%f;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,speedup,efficiency,difference_single_thread,difference_multi_thread);
     }
 
     //destroying all allocated memory an terminating the program

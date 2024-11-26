@@ -1,4 +1,5 @@
 #include <omp.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -22,7 +23,7 @@ simulation start_simulation(float_2D simspace, float delta_x, float diffusion, s
     return sim;
 }
 
-float_2D simulate_OMP(simulation * sim, float delta_t, double * elapsed_time){
+SIMULATION_INTERFACE(OMP){
     
     //prepare to return the elapsed time
     double start = omp_get_wtime();
@@ -39,9 +40,10 @@ float_2D simulate_OMP(simulation * sim, float delta_t, double * elapsed_time){
     float ** next = sim->simspace[sim->current_space].data;
     size_t height = sim->simspace[0].height;
     size_t width = sim->simspace[0].width;
+    float diff = 0;
 
-    //calculate the next iteration
-    #pragma omp parallel for
+    //calculate the next iteration and the difference as required by the problem prompt
+    #pragma omp parallel for reduction(+:diff)
         for(size_t i = 1; i < height - 1; i++){
         for(size_t j = 1; j < width - 1; j++){
             next[i][j] = (current[i][j] + 
@@ -51,15 +53,19 @@ float_2D simulate_OMP(simulation * sim, float delta_t, double * elapsed_time){
                             current[i][j - 1] +   
                             current[i][j + 1] - 
                             4 * current[i][j]));
-        }}    
+            diff += fabs(next[i][j] - current[i][j]);
+        }}
 
+    
     omp_set_dynamic(old_dynamic);
     *elapsed_time = omp_get_wtime() - start;
+    *difference = diff;
     return sim->simspace[sim->current_space];
 } 
 
 //base single threaded implementation
-float_2D simulate_base(simulation * sim, float delta_t, double * elapsed_time){
+SIMULATION_INTERFACE(base){
+    
     //prepare to return the elapsed time
     double start = omp_get_wtime();
 
@@ -70,8 +76,9 @@ float_2D simulate_base(simulation * sim, float delta_t, double * elapsed_time){
     float ** next = sim->simspace[sim->current_space].data;
     size_t height = sim->simspace[0].height;
     size_t width = sim->simspace[0].width;
+    float diff = 0;
 
-    //calculate the next iteration
+    //calculate the next iteration and the difference as required by the problem prompt
     for(size_t i = 1; i < height - 1; i++){
     for(size_t j = 1; j < width - 1; j++){
         next[i][j] = (current[i][j] + 
@@ -81,9 +88,11 @@ float_2D simulate_base(simulation * sim, float delta_t, double * elapsed_time){
                         current[i][j - 1] +   
                         current[i][j + 1] - 
                         4 * current[i][j]));
+        diff += fabs(next[i][j] - current[i][j]);
     }}    
 
     *elapsed_time = omp_get_wtime() - start;
+    *difference = diff;
     return sim->simspace[sim->current_space];
 }
 
