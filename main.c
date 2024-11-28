@@ -131,7 +131,7 @@ int main(int argc, char ** argv){
     
     //print csv header on stdout
     //user can redirect th std to any file they wish
-    fprintf(stdout,"iteration;exec time (1 thread);exec time (%ld threads);speedup;efficiency;difference (1 thread);difference(%ld threads)",threads,threads);
+    fprintf(stdout,"iteration;exec time (1 thread);exec time (%ld threads);exec time (%ld threads linear);speedup;speedup (linear);efficiency;efficiency (linear);difference (1 thread);difference(%ld threads)",threads,threads,threads);
 
     //space where the simulation will take place
     float_2D simspace;
@@ -143,8 +143,13 @@ int main(int argc, char ** argv){
     //configuring simulation
     simulation sim_multi_thread = start_simulation(simspace,delta_x,diffusion,threads);
     simulation sim_single_thread = start_simulation(simspace,delta_x,diffusion,1);
-    double time_multi_thread;
-    double time_single_thread;
+    double t_iter_single_thread = 0;
+    double t_iter_multi_thread = 0;
+    
+    double time_multi_thread = 0;
+    double time_single_thread = 0;
+    double time_linear = 0;
+
     float difference_multi_thread;
     float difference_single_thread;
 
@@ -152,15 +157,20 @@ int main(int argc, char ** argv){
     for(size_t i = 0; i < iterations; i++){
         
         //run the single and multi threaded simulations
-        simulate_OMP(&sim_multi_thread,time_step,&time_multi_thread,&difference_multi_thread); 
-        simulate_base(&sim_single_thread,time_step,&time_single_thread,&difference_single_thread); //discard the single threaded frame    
+        simulate_OMP(&sim_multi_thread,time_step,&t_iter_multi_thread,&difference_multi_thread); 
+        simulate_base(&sim_single_thread,time_step,&t_iter_single_thread,&difference_single_thread); //discard the single threaded frame    
         
         //calculate the metrics
+        time_multi_thread += t_iter_multi_thread;
+        time_single_thread += t_iter_single_thread;
+        time_linear = time_single_thread / ((double)threads);
         double speedup = time_single_thread / time_multi_thread;
         double efficiency = speedup / ((double)threads);
+        double speedup_linear = time_single_thread / time_linear;
+        double efficiency_linear = speedup_linear / ((double)threads);
 
         //output to stdout
-        fprintf(stdout,"\n%ld;%f;%f;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,speedup,efficiency,difference_single_thread,difference_multi_thread);
+        fprintf(stdout,"\n%ld;%f;%f;%f;%f;%f;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,time_linear,speedup,speedup_linear,efficiency,efficiency_linear,difference_single_thread,difference_multi_thread);
     }
 
     //destroying all allocated memory an terminating the program
