@@ -1,14 +1,15 @@
-COMPILER = gcc
-CFLAGS = -g  -Wall -Wextra -fopenmp
-LIBS = -lm -lncurses
+COMPILER = nvcc
+CFLAGS = -Xcompiler "-g -Wall -Wextra -fopenmp" 
+LIBS = -Xlinker "-lm -lncurses"
 
 SRC_FILES = $(wildcard *.c)
+CU_SRC_FILES = $(wildcard *.cu)
 OBJ_FILES = $(patsubst %.c, object/%.o, $(SRC_FILES))
 TARGET = main
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ_FILES)
+$(TARGET): $(OBJ_FILES) $(CU_SRC_FILES)
 	$(COMPILER) $(CFLAGS) -o $@ $^ $(LIBS)
 
 object/%.o: %.c

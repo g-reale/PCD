@@ -1,5 +1,6 @@
 #include <omp.h>
 #include <math.h>
+#include <cuda.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -95,6 +96,14 @@ SIMULATION_INTERFACE(base){
     *difference = diff;
     return sim->simspace[sim->current_space];
 }
+
+// __global__ diffusion_kernel(simulation * sim, float * delta_t, double * elapsed_time, float * difference){
+  
+// }
+
+// SIMULATION_INTERFACE(cuda){
+
+// }
 
 void destroy_simulation(simulation sim){
     destroy2D(sim.simspace[0]);
