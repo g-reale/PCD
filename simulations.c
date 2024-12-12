@@ -97,14 +97,6 @@ SIMULATION_INTERFACE(base){
     return sim->simspace[sim->current_space];
 }
 
-// __global__ diffusion_kernel(simulation * sim, float * delta_t, double * elapsed_time, float * difference){
-  
-// }
-
-// SIMULATION_INTERFACE(cuda){
-
-// }
-
 void destroy_simulation(simulation sim){
     destroy2D(sim.simspace[0]);
     destroy2D(sim.simspace[1]);

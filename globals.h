@@ -91,6 +91,20 @@ static inline char getarrowkeys(int key, size_t * cursor_y, size_t * cursor_x, s
     return key;
 } 
 
+static inline size_t ceildiv(size_t numerator, size_t denominator){
+    return numerator / denominator + numerator % denominator ? 1 : 0;
+}
+
+static inline float * flaten(float_2D matrix){
+    float * flatend = (float*)malloc(sizeof(float) * matrix.height * matrix.width);
+    size_t k = 0;
+    for(size_t i = 0; i < matrix.height; i++){
+    for(size_t j = 0; j < matrix.width; j++,k++)
+        flatend[k] = matrix[i][j];
+    }
+    return flatend;
+}
+
 // static inline void setgrayscale(WINDOW * win, float brightness){
 //     char num[4];
 //     sprintf(num,"%d",(int)brightness);
