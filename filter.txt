@@ -1,0 +1,8 @@
++ makefile
++ *.cuh
++ *.cu
++ *.c
++ *.h
++ *.sh
++ filter.txt
+- **

@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 #include <stddef.h>
-#include "globals.h"
+#include "globals.cuh"
 
 typedef struct {
     WINDOW * win;

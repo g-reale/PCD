@@ -1,5 +1,5 @@
-#include "matrix.h"
-#include "globals.h"
+#include "matrix.cuh"
+#include "globals.cuh"
 #include <ncurses.h>
 #include <stddef.h>
 #include <stdlib.h>
