@@ -1,0 +1,3 @@
+object/main.o object/matrix.o object/outputwin.o object/simulations.o
+main
+log
