@@ -1,9 +1,6 @@
 #ifndef SIMUMLATIONS_H
 #define SIMUMLATIONS_H
-
-#include <cuda.h>
-#include <omp.h>
-#include "globals.h"
+#include "globals.cuh"
 
 typedef struct{
     float delta_x;
@@ -21,5 +18,7 @@ SIMULATION_INTERFACE(OMP);
 SIMULATION_INTERFACE(base);
 SIMULATION_INTERFACE(cuda);
 void destroy_simulation(simulation sim);
+void destroy_cuda();
 
 #endif
+

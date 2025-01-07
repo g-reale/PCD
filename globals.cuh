@@ -3,6 +3,7 @@
 
 #include <ncurses.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define declare1D(type)\
@@ -91,62 +92,28 @@ static inline char getarrowkeys(int key, size_t * cursor_y, size_t * cursor_x, s
     return key;
 } 
 
-static inline size_t ceildiv(size_t numerator, size_t denominator){
-    return numerator / denominator + numerator % denominator ? 1 : 0;
+static inline int ceildiv(int numerator, int denominator){
+    return (numerator / denominator) + (numerator % denominator > 0);
 }
 
-static inline float * flaten(float_2D matrix){
+static inline float * flatten(float_2D matrix){
     float * flatend = (float*)malloc(sizeof(float) * matrix.height * matrix.width);
     size_t k = 0;
     for(size_t i = 0; i < matrix.height; i++){
     for(size_t j = 0; j < matrix.width; j++,k++)
-        flatend[k] = matrix[i][j];
+        flatend[k] = matrix.data[i][j];
     }
     return flatend;
 }
 
-// static inline void setgrayscale(WINDOW * win, float brightness){
-//     char num[4];
-//     sprintf(num,"%d",(int)brightness);
-//     wprintw(win, "\033[38;2;255;0;0m");
-// }
-
-// static const int CUSTOM_PAIR = 1;
-// static const int CUSTOM_COLOR = COLOR_CYAN;
-// static short _r, _g, _b;
-// static short _current_atribute = SHRT_MAX;
-
-// static inline void pushcolor(){color_content(CUSTOM_COLOR,&_r,&_g,&_b);}
-// static inline void popcolor(){init_color(CUSTOM_COLOR,_r,_g,_b);}
-// static inline void setcolor(WINDOW * win, short r, short g, short b){
-//     init_color(CUSTOM_COLOR,r,g,b);
-//     init_pair(CUSTOM_PAIR,CUSTOM_COLOR,COLOR_BLACK);
-//     wattron(win,COLOR_PAIR(CUSTOM_PAIR));
-// }
-
-// static inline void initgraycolorspace(){
-//     pushcolor();
-//     for (short i = 0; i < 1000; i++) {
-//         init_color(CUSTOM_PAIR, i, i, i);
-//         init_pair(i + 1, CUSTOM_PAIR, COLOR_BLACK);
-//     }
-//     popcolor();
-// }
-// static inline void setgrayscale(WINDOW * win, float brightness){
-//     short aux = (short)brightness; 
-
-//     if(_current_atribute != SHRT_MAX)
-//         attroff(_current_atribute);
-    
-//     _current_atribute = aux;
-//     wattron(win,COLOR_PAIR(_current_atribute));
-
-
-//     attr_t attrs;
-//     short current_color_pair;
-//     wattr_get(win,&attrs, &current_color_pair, NULL);
-//     fprintf(stderr, "Brightness: %f, Using color pair: %d, Can change color: %d\width",
-//             brightness, aux, can_change_color());
-// }
+static inline void fold(float * flatend, float_2D matrix){
+    size_t k = 0;
+    for(size_t i = 0; i < matrix.height; i++){
+    for(size_t j = 0; j < matrix.width; j++,k++)
+        matrix.data[i][j] = flatend[k];
+    }
+} 
 
 #endif
+
+

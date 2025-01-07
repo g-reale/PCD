@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <stdlib.h>
-#include "outputwin.h"
+#include "outputwin.cuh"
 
 outputwin start_outputwin(size_t height, size_t width, size_t y0, size_t x0, char_2D labels, size_t labels_per_line){
 
