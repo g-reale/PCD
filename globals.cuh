@@ -51,16 +51,22 @@ declare2D(char);
 
 static const char_1D GRAY_SCALE = {
     71,
-    "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'."
+    (char *)"$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'."
 };
 
 static const char_1D GRAY_SCALE_1 = {
     10,
-    " .:-=+*#%@"
+    (char *)" .:-=+*#%@"
 };
 
 #define clamp(value,min,max)\
     (value) < (min) ? (min) : (max) < (value) ? (max) : (value)
+
+#define ceildiv(numerator,denominator)\
+    ((numerator / denominator) + (numerator % denominator > 0))
+
+#define ceil2div(numerator)\
+    ((numerator+1)>>1)
 
 static inline char getgrayscale(char_1D grayscale,float brightness){
     size_t index = fabs(brightness * (float)grayscale.height);
@@ -92,9 +98,9 @@ static inline char getarrowkeys(int key, size_t * cursor_y, size_t * cursor_x, s
     return key;
 } 
 
-static inline int ceildiv(int numerator, int denominator){
-    return (numerator / denominator) + (numerator % denominator > 0);
-}
+// static inline int ceildiv(int numerator, int denominator){
+//     return (numerator / denominator) + (numerator % denominator > 0);
+// }
 
 static inline float * flatten(float_2D matrix){
     float * flatend = (float*)malloc(sizeof(float) * matrix.height * matrix.width);

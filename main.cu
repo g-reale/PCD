@@ -8,6 +8,7 @@
 #include "outputwin.cuh"
 #include "simulations.cuh"
 #include "globals.cuh"
+#include "kernels.cuh"
 
 #define DISP_HEIGHT 4
 
@@ -36,10 +37,10 @@ int main(int argc, char ** argv){
     //if no arguments use default values
     else{
         // visual = 1;
-        M = 10;
-        N = 10;
-        threads = 4;
-        iterations = 1;
+        M = 1000;
+        N = 1000;
+        threads = 8;
+        iterations = 50;
         diffusion = 0.1;
         time_step = 0.01;
         delta_x = 1.0;
@@ -146,42 +147,51 @@ int main(int argc, char ** argv){
 
     //configuring simulation
     simulation sim_multi_thread = start_simulation(simspace,delta_x,diffusion,threads);
-    // simulation sim_single_thread = start_simulation(simspace,delta_x,diffusion,1);
-    // double t_iter_single_thread = 0;
+    simulation sim_single_thread = start_simulation(simspace,delta_x,diffusion,1);
+    double t_iter_single_thread = 0;
     double t_iter_multi_thread = 0;
     
-    // double time_multi_thread = 0;
-    // double time_single_thread = 0;
-    // double time_linear = 0;
+    double time_multi_thread = 0;
+    double time_single_thread = 0;
+    double time_linear = 0;
 
     float difference_multi_thread;
-    // float difference_single_thread;
+    float difference_single_thread;
+
+    start_cuda(&sim_multi_thread,time_step);
 
     //running the bad boy... again
     for(size_t i = 0; i < iterations; i++){
         
         //run the single and multi threaded simulations
-        float_2D current_frame = simulate_cuda(&sim_multi_thread,time_step,&t_iter_multi_thread,&difference_multi_thread); 
-        printf("%f\n",current_frame.data[M/2][N/2]);
-        // simulate_base(&sim_single_thread,time_step,&t_iter_single_thread,&difference_single_thread); //discard the single threaded frame    
+        simulate_cuda(&sim_multi_thread,time_step,&t_iter_multi_thread,&difference_multi_thread); 
+        simulate_base(&sim_single_thread,time_step,&t_iter_single_thread,&difference_single_thread); //discard the single threaded frame    
         
         //calculate the metrics
-        // time_multi_thread += t_iter_multi_thread;
-        // time_single_thread += t_iter_single_thread;
-        //time_linear = time_single_thread / ((double)threads);
-        // double speedup = time_single_thread / time_multi_thread;
-        // double efficiency = speedup / ((double)threads);
-        // double speedup_linear = time_single_thread / time_linear;
-        // double efficiency_linear = speedup_linear / ((double)threads);
+        time_multi_thread += t_iter_multi_thread;
+        time_single_thread += t_iter_single_thread;
+        time_linear = time_single_thread / ((double)threads);
+        double speedup = time_single_thread / time_multi_thread;
+        double efficiency = speedup / ((double)threads);
+        double speedup_linear = time_single_thread / time_linear;
+        double efficiency_linear = speedup_linear / ((double)threads);
 
-        // //output to stdout
-        // fprintf(stdout,"\n%ld;%f;%f;%f;%f;%f;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,time_linear,speedup,speedup_linear,efficiency,efficiency_linear,difference_single_thread,difference_multi_thread);
+        
+        // float ** multi = sim_multi_thread.simspace[sim_multi_thread.current_space].data;
+        // float ** single = sim_single_thread.simspace[sim_single_thread.current_space].data;
+        // for(int j = 0; j < M; j++){
+        // for(int k = 0; k < N; k++){
+        //   printf("\n%f %f", multi[j][k],single[j][k]);
+        // }}
+
+        //output to stdout
+        fprintf(stdout,"\n%ld;%f;%f;%f;%f;%f;%f;%f;%f;%f",i,time_single_thread,time_multi_thread,time_linear,speedup,speedup_linear,efficiency,efficiency_linear,difference_single_thread,difference_multi_thread);
     }
 
     //destroying all allocated memory an terminating the program
-    destroy_simulation(sim_multi_thread);
     destroy_cuda();
-    // destroy_simulation(sim_single_thread);
+    destroy_simulation(sim_multi_thread);
+    destroy_simulation(sim_single_thread);
     destroy2D(simspace);
     return 0;
 }
