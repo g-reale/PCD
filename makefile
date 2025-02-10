@@ -1,6 +1,6 @@
-COMPILER = gcc
+COMPILER = mpicc
 CFLAGS = -g  -Wall -Wextra -fopenmp
-LIBS = -lm -lncurses
+LIBS = -lm
 
 SRC_FILES = $(wildcard *.c)
 OBJ_FILES = $(patsubst %.c, object/%.o, $(SRC_FILES))

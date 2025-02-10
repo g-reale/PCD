@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "simulations.h"
 
+
 simulation start_simulation(float_2D simspace, float delta_x, float diffusion, size_t n_threads){
     simulation sim = {
         delta_x,
