@@ -3,8 +3,15 @@
 
 #include <mpi.h>
 
-void startMPI(int * argc, char *** argv);
+typedef struct{
+    int me;
+    int predecessor;
+    int sucessor;
+    int population;
+}MPI_context;
+
+MPI_context * start_MPI_context(int * argc, char *** argv);
+void destroy_MPI_context(MPI_context * context);
 // void updateMPI();
-// void destroyMPI();
 
 #endif
