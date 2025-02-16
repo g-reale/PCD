@@ -20,7 +20,7 @@ int main(int argc, char ** argv){
     float delta_x;
  
     //pop the command line arguments
-    if(argc == 9){
+    if(argc == 8){
         M = atoi(argv[1]);
         N = atoi(argv[2]);
         threads = atoi(argv[3]);
