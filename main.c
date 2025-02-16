@@ -10,6 +10,9 @@
 #define DISP_HEIGHT 4
 
 int main(int argc, char ** argv){
+    
+    //simulation mode
+    MPI_context * context = start_MPI_context(&argc,&argv);
 
     size_t M;
     size_t N;
@@ -20,7 +23,7 @@ int main(int argc, char ** argv){
     float delta_x;
  
     //pop the command line arguments
-    if(argc == 8){
+    if(9 <= argc){
         M = atoi(argv[1]);
         N = atoi(argv[2]);
         threads = atoi(argv[3]);
@@ -39,9 +42,6 @@ int main(int argc, char ** argv){
         time_step = 0.01;
         delta_x = 1.0;
     }
-
-    //simulation mode
-    MPI_context * context = start_MPI_context(&argc,&argv);
     
     //print csv header on stdout
     //user can redirect th std to any file they wish
